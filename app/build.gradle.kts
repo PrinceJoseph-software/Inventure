@@ -2,16 +2,15 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-kapt")
 }
 
 android {
-    namespace = "com.example.inventure"
-    compileSdk {
-        version = release(36)
-    }
+    namespace = "com.example.taskmanager"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.inventure"
+        applicationId = "com.example.taskmanager"
         minSdk = 31
         targetSdk = 36
         versionCode = 1
@@ -42,6 +41,22 @@ android {
 }
 
 dependencies {
+
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.foundation)
+    val roomVersion = "2.6.1"
+    val lifecycleVersion = "2.9.4"
+
+    // Room
+    implementation("androidx.room:room-runtime:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+
+    // Lifecycle (fixed typo + removed duplicates)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
