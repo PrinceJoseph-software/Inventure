@@ -15,7 +15,9 @@ data class Inventure(
         val price: Double = 0.0,
         val category: String,
         val supplier: String,
-        val dateAdded: Long = System.currentTimeMillis()
+        val dateAdded: Long = System.currentTimeMillis(),
+        val lastUpdated: Long = System.currentTimeMillis(),
+        val timestamp: Long = System.currentTimeMillis()
     )
 
 
