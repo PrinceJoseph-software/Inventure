@@ -67,10 +67,8 @@ fun InventureApp(viewModel: InventureViewModel) {
             )
         }
 
-        // Remove Stock Screen (placeholder - you'll need to create this)
         composable("remove_stock") {
-            // TODO: Create RemoveStockScreen composable
-            ProductListScreen(
+            RemoveStockScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() }
             )

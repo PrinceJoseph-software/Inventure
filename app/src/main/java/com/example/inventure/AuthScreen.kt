@@ -164,7 +164,7 @@ fun SignUpPanel(onSwitchToLogin: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF4B0082),
+                    focusedBorderColor = Color(0xFF0A0110),
                     unfocusedBorderColor = Color.Gray
                 )
             )
@@ -174,7 +174,7 @@ fun SignUpPanel(onSwitchToLogin: () -> Unit) {
                 onClick = onSwitchToLogin,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4B0082),
+                    containerColor = Color(0xFF000000),
                     contentColor = Color.White
                 )
             ) {
@@ -183,7 +183,7 @@ fun SignUpPanel(onSwitchToLogin: () -> Unit) {
 
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = onSwitchToLogin) {
-                Text("Already have an account? Sign In", color = Color(0xFF4B0082))
+                Text("Already have an account? Sign In", color = Color(0xFF000000))
             }
         }
     }
