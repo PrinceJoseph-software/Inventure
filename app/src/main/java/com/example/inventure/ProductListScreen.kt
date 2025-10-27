@@ -10,6 +10,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,7 +34,20 @@ fun ProductListScreen(
     val products = viewModel.products.collectAsState(initial = emptyList())
     val sheetState = rememberModalBottomSheetState()
     var selectedProduct by remember { mutableStateOf<Inventure?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+
+    // Filter products based on search query
+    val filteredProducts = remember(products.value, searchQuery) {
+        if (searchQuery.isBlank()) {
+            products.value
+        } else {
+            products.value.filter { product ->
+                product.name.contains(searchQuery, ignoreCase = true) ||
+                        product.description.contains(searchQuery, ignoreCase = true)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -49,33 +64,58 @@ fun ProductListScreen(
             )
         }
     ) { padding ->
-        if (products.value.isEmpty()) {
-            Box(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            // Search Bar
+            SearchBar(
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("No products available.")
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(products.value) { product ->
-                    ProductCard(
-                        product = product,
-                        onClick = {
-                            selectedProduct = product
-                            scope.launch {
-                                sheetState.show()
-                            }
-                        }
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+
+            // Product List
+            if (filteredProducts.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (searchQuery.isBlank()) {
+                            "No products available."
+                        } else {
+                            "No products found for \"$searchQuery\""
+                        },
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Gray
                     )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(filteredProducts) { product ->
+                        ProductCard(
+                            product = product,
+                            onClick = {
+                                selectedProduct = product
+                                scope.launch {
+                                    sheetState.show()
+                                }
+                            }
+                        )
+                    }
+                    // Add bottom spacing
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
             }
         }
@@ -101,6 +141,46 @@ fun ProductListScreen(
             )
         }
     }
+}
+
+@Composable
+fun SearchBar(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = searchQuery,
+        onValueChange = onSearchQueryChange,
+        modifier = modifier,
+        placeholder = { Text("Search products...") },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search",
+                tint = Color.Gray
+            )
+        },
+        trailingIcon = {
+            if (searchQuery.isNotEmpty()) {
+                IconButton(onClick = { onSearchQueryChange("") }) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Clear search",
+                        tint = Color.Gray
+                    )
+                }
+            }
+        },
+        singleLine = true,
+        shape = RoundedCornerShape(24.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Color(0xFF4B0082),
+            unfocusedBorderColor = Color(0xFFE0E0E0),
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White
+        )
+    )
 }
 
 @Composable
@@ -418,29 +498,33 @@ fun EditQuantityDialog(
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                         keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
                     ),
-                    isError = errorMessage != null,
-                    supportingText = {
-                        errorMessage?.let { Text(it, color = Color.Red) }
-                    }
+                    singleLine = true
                 )
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage!!,
+                        color = Color.Red,
+                        fontSize = 12.sp
+                    )
+                }
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    val qty = newQuantity.toIntOrNull()
-                    when {
-                        qty == null || qty < 0 -> {
-                            errorMessage = "Enter a valid quantity"
-                        }
-                        else -> {
-                            viewModel.updateProductQuantity(product, product.quantity - qty)
-                            onDismiss()
-                        }
+                    val quantityInt = newQuantity.toIntOrNull()
+                    if (quantityInt == null || quantityInt < 0) {
+                        errorMessage = "Please enter a valid non-negative number."
+                    } else {
+                        viewModel.updateProductQuantity(product, quantityInt)
+                        onDismiss()
                     }
-                }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4B0082)
+                )
             ) {
-                Text("Update")
+                Text("Save")
             }
         },
         dismissButton = {
