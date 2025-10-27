@@ -2,62 +2,36 @@ package com.example.inventure
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.analytics.ecommerce.Product
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 
-class InventureViewModel(private val repository: InventureRepository) : ViewModel() {
+class InventureViewModel(private val repository: ProductRepository) : ViewModel() {
 
-    // StateFlow to hold the list of all products
-    private val _products = MutableStateFlow<List<Product>>(emptyList())
-    val products: StateFlow<List<Product>> = _products
+    // Expose the Flow directly from repository
+    val products = repository.allProducts
 
-    // Initialize by loading all products
-    init {
-        loadProducts()
-    }
-
-    // Function to load all products from the database
-    private fun loadProducts() {
-        viewModelScope.launch {
-            repository.getAllProducts().collect { productList ->
-                _products.value = productList
-            }
-        }
-    }
-
-    // Function to add a new product
     fun addProduct(
-        image: String,
         name: String,
         description: String,
         price: Double,
         quantity: Int
     ) {
-        viewModelScope.launch {
-            val product = Product(
-                image = image,
+        viewModelScope.launch(Dispatchers.IO) {
+            val product = Inventure(
                 name = name,
                 description = description,
                 price = price,
                 quantity = quantity
             )
-            repository.insertProduct(product)
+            repository.addProduct(product)
         }
     }
 
-    // Function to delete a product
-    fun deleteProduct(product: Product) {
-        viewModelScope.launch {
+    fun deleteProduct(product: Inventure) {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.deleteProduct(product)
-        }
-    }
-
-    // Function to update a product
-    fun updateProduct(product: Product) {
-        viewModelScope.launch {
-            repository.updateProduct(product)
         }
     }
 }

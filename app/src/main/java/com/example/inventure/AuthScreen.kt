@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -55,6 +56,9 @@ fun AuthScreen(onLoginSuccess: () -> Unit) {
 
 @Composable
 fun SignInPanel(onSwitchToSignUp: () -> Unit, onLoginSuccess: () -> Unit) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
     Card(
         modifier = Modifier.fillMaxWidth(0.9f),
         shape = RoundedCornerShape(24.dp),
@@ -67,28 +71,59 @@ fun SignInPanel(onSwitchToSignUp: () -> Unit, onLoginSuccess: () -> Unit) {
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Sign In", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text("Sign In", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
 
             Spacer(Modifier.height(16.dp))
-            OutlinedTextField(value = "", onValueChange = {}, label = { Text("Email") })
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF4B0082),
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
             Spacer(Modifier.height(12.dp))
-            OutlinedTextField(value = "", onValueChange = {}, label = { Text("Password") })
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF4B0082),
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
 
             Spacer(Modifier.height(16.dp))
-            Button(onClick = onLoginSuccess) { Text("Sign In") }
+            Button(
+                onClick = onLoginSuccess,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4B0082))
+            ) {
+                Text("Sign In")
+            }
 
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = onSwitchToSignUp) { Text("Don’t have an account? Sign Up") }
+            TextButton(onClick = onSwitchToSignUp) {
+                Text("Don't have an account? Sign Up", color = Color(0xFF4B0082))
+            }
         }
     }
 }
 
 @Composable
 fun SignUpPanel(onSwitchToLogin: () -> Unit) {
+    var fullName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
     Card(
         modifier = Modifier.fillMaxWidth(0.9f),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF4B0082)),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Column(
@@ -97,26 +132,58 @@ fun SignUpPanel(onSwitchToLogin: () -> Unit) {
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Sign Up", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text("Sign Up", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFF4B0082))
 
             Spacer(Modifier.height(16.dp))
-            OutlinedTextField(value = "", onValueChange = {}, label = { Text("Full Name") })
+            OutlinedTextField(
+                value = fullName,
+                onValueChange = { fullName = it },
+                label = { Text("Full Name") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF4B0082),
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
             Spacer(Modifier.height(12.dp))
-            OutlinedTextField(value = "", onValueChange = {}, label = { Text("Email") })
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF4B0082),
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
             Spacer(Modifier.height(12.dp))
-            OutlinedTextField(value = "", onValueChange = {}, label = { Text("Password") })
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF4B0082),
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
 
             Spacer(Modifier.height(16.dp))
             Button(
                 onClick = onSwitchToLogin,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color(0xFF4B0082))
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4B0082),
+                    contentColor = Color.White
+                )
             ) {
                 Text("Sign Up")
             }
 
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = onSwitchToLogin) {
-                Text("Already have an account? Sign In", color = Color.White)
+                Text("Already have an account? Sign In", color = Color(0xFF4B0082))
             }
         }
     }

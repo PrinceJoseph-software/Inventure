@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.taskmanager"
+    namespace = "com.example.inventure"  // ✅ Changed
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.taskmanager"
+        applicationId = "com.example.inventure"  // ✅ Changed
         minSdk = 31
         targetSdk = 36
         versionCode = 1
