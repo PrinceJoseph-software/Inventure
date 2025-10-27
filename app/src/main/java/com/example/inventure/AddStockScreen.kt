@@ -150,7 +150,7 @@ fun AddStockScreen(
                             description = description,
                             price = priceValue,
                             quantity = quantityValue,
-                            imageUri = imageUri?.toString()  // ✅ Pass image URI
+                            imageUri = imageUri?.toString()  //Pass image URI
                         )
                         onAddSuccess()
                     } else {

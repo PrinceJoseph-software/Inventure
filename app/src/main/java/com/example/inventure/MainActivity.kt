@@ -19,11 +19,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private lateinit var themeManager: ThemeManager
+    private lateinit var authManager: AuthManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         themeManager = ThemeManager(this)
+        authManager = AuthManager(this)
 
         setContent {
             val isDarkMode by themeManager.isDarkMode.collectAsState(initial = false)
@@ -32,6 +34,7 @@ class MainActivity : ComponentActivity() {
             InventureTheme(darkTheme = isDarkMode) {
                 InventureApp(
                     viewModel = viewModel,
+                    authManager = authManager,
                     isDarkMode = isDarkMode,
                     onToggleDarkMode = { enabled ->
                         scope.launch {

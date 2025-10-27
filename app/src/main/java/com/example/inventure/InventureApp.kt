@@ -2,6 +2,7 @@ package com.example.inventure
 
 import android.app.Application
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -9,8 +10,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.inventure.ui.AddStockScreen
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 
-//Application class that initializes database and repository
 class InventureApplication : Application() {
     val database: InventureDatabase by lazy { InventureDatabase.getDatabase(this) }
     val repository: ProductRepository by lazy { ProductRepository(database.inventureDao()) }
@@ -19,10 +20,12 @@ class InventureApplication : Application() {
 @Composable
 fun InventureApp(
     viewModel: InventureViewModel,
+    authManager: AuthManager,
     isDarkMode: Boolean,
     onToggleDarkMode: (Boolean) -> Unit
 ) {
     val navController = rememberNavController()
+    val scope = rememberCoroutineScope()
 
     NavHost(
         navController = navController,
@@ -50,7 +53,15 @@ fun InventureApp(
                 viewModel = viewModel,
                 navController = navController,
                 isDarkMode = isDarkMode,
-                onToggleDarkMode = onToggleDarkMode
+                onToggleDarkMode = onToggleDarkMode,
+                onLogout = {
+                    scope.launch {
+                        authManager.logout()
+                        navController.navigate("auth") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                }
             )
         }
 
@@ -77,7 +88,6 @@ fun InventureApp(
     }
 }
 
-//Fake DAO for Preview
 class FakeInventureDao : InventureDao {
     override fun getAllProducts(): Flow<List<Inventure>> = flowOf(
         listOf(
@@ -96,8 +106,10 @@ fun DisplayUX() {
     val fakeRepository = ProductRepository(fakeDao)
     val fakeViewModel = InventureViewModel(fakeRepository)
 
+    // Preview won't work without context, but this is just structure
     InventureApp(
         viewModel = fakeViewModel,
+        authManager = AuthManager(androidx.compose.ui.platform.LocalContext.current),
         isDarkMode = false,
         onToggleDarkMode = {}
     )

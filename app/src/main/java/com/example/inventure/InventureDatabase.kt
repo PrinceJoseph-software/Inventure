@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Inventure::class], version = 2, exportSchema = false)  // ✅ Changed to version 2
+@Database(entities = [Inventure::class], version = 2, exportSchema = false)
 abstract class InventureDatabase : RoomDatabase() {
 
     abstract fun inventureDao(): InventureDao
@@ -30,7 +30,7 @@ abstract class InventureDatabase : RoomDatabase() {
                     InventureDatabase::class.java,
                     "inventure_database"
                 )
-                    .addMigrations(MIGRATION_1_2)  // ✅ Add migration
+                    .addMigrations(MIGRATION_1_2)
                     .build()
                 INSTANCE = instance
                 instance

@@ -38,7 +38,7 @@ fun SignUpScreen(
                 text = "Create Your Account",
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
-                color = Color(0xFF4B0082)
+                color = Color(0xFF06000A)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -74,7 +74,7 @@ fun SignUpScreen(
             Button(
                 onClick = onSignUp,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4B0082),
+                    containerColor = Color(0xFF0B0311),
                     contentColor = Color.White
                 ),
                 modifier = Modifier.fillMaxWidth()
