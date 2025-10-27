@@ -1,6 +1,6 @@
 package com.example.inventure
 
-// InventureDao.kt (the DAO interface)
+
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -20,7 +20,4 @@ interface InventureDao {
     @Delete
     suspend fun deleteProduct(product: Inventure)
 
-    // Add more queries if needed, for example:
-    // @Query("SELECT * FROM products WHERE name LIKE :search")
-    // fun searchProducts(search: String): Flow<List<Inventure>>
 }

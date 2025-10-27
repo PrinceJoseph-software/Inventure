@@ -4,9 +4,9 @@ import kotlinx.coroutines.flow.Flow
 
 class ProductRepository(private val dao: InventureDao) {
 
-    val allProducts = dao.getAllProducts() // rename 'products' to 'allProducts'
+    val allProducts = dao.getAllProducts()
 
-    suspend fun addProduct(product: Inventure) { // rename method
+    suspend fun addProduct(product: Inventure) {
         dao.insertProduct(product)
     }
 

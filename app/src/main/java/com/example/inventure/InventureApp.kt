@@ -10,21 +10,24 @@ import com.example.inventure.ui.AddStockScreen
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
-// ✅ Application class that initializes database and repository
+//Application class that initializes database and repository
 class InventureApplication : Application() {
     val database: InventureDatabase by lazy { InventureDatabase.getDatabase(this) }
     val repository: ProductRepository by lazy { ProductRepository(database.inventureDao()) }
 }
 
 @Composable
-fun InventureApp(viewModel: InventureViewModel) {
+fun InventureApp(
+    viewModel: InventureViewModel,
+    isDarkMode: Boolean,
+    onToggleDarkMode: (Boolean) -> Unit
+) {
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
         startDestination = "welcome"
     ) {
-        // Welcome Screen
         composable("welcome") {
             WelcomeScreen(
                 viewModel = viewModel,
@@ -32,7 +35,6 @@ fun InventureApp(viewModel: InventureViewModel) {
             )
         }
 
-        // Auth Screen
         composable("auth") {
             AuthScreen(
                 onLoginSuccess = {
@@ -43,15 +45,15 @@ fun InventureApp(viewModel: InventureViewModel) {
             )
         }
 
-        // Home Screen
         composable("home") {
             HomeScreen(
                 viewModel = viewModel,
-                navController = navController
+                navController = navController,
+                isDarkMode = isDarkMode,
+                onToggleDarkMode = onToggleDarkMode
             )
         }
 
-        // Product List Screen
         composable("products") {
             ProductListScreen(
                 viewModel = viewModel,
@@ -59,7 +61,6 @@ fun InventureApp(viewModel: InventureViewModel) {
             )
         }
 
-        // Add Stock Screen
         composable("add_stock") {
             AddStockScreen(
                 viewModel = viewModel,
@@ -76,7 +77,7 @@ fun InventureApp(viewModel: InventureViewModel) {
     }
 }
 
-// ✅ Fake DAO for Preview
+//Fake DAO for Preview
 class FakeInventureDao : InventureDao {
     override fun getAllProducts(): Flow<List<Inventure>> = flowOf(
         listOf(
@@ -95,5 +96,9 @@ fun DisplayUX() {
     val fakeRepository = ProductRepository(fakeDao)
     val fakeViewModel = InventureViewModel(fakeRepository)
 
-    InventureApp(viewModel = fakeViewModel)
+    InventureApp(
+        viewModel = fakeViewModel,
+        isDarkMode = false,
+        onToggleDarkMode = {}
+    )
 }

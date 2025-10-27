@@ -1,15 +1,17 @@
 package com.example.inventure
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,6 +30,9 @@ fun ProductListScreen(
     onBackClick: () -> Unit
 ) {
     val products = viewModel.products.collectAsState(initial = emptyList())
+    val sheetState = rememberModalBottomSheetState()
+    var selectedProduct by remember { mutableStateOf<Inventure?>(null) }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -61,17 +67,51 @@ fun ProductListScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(products.value) { product ->
-                    ProductCard(product = product)
+                    ProductCard(
+                        product = product,
+                        onClick = {
+                            selectedProduct = product
+                            scope.launch {
+                                sheetState.show()
+                            }
+                        }
+                    )
                 }
             }
+        }
+    }
+
+    // Bottom Sheet
+    if (selectedProduct != null) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                selectedProduct = null
+            },
+            sheetState = sheetState
+        ) {
+            ProductDetailSheet(
+                product = selectedProduct!!,
+                viewModel = viewModel,
+                onDismiss = {
+                    scope.launch {
+                        sheetState.hide()
+                        selectedProduct = null
+                    }
+                }
+            )
         }
     }
 }
 
 @Composable
-fun ProductCard(product: Inventure) {
+fun ProductCard(
+    product: Inventure,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -82,7 +122,7 @@ fun ProductCard(product: Inventure) {
                 .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // ✅ Product Image
+            // Product Image
             if (product.imageUri != null) {
                 Image(
                     painter = rememberAsyncImagePainter(product.imageUri),
@@ -93,12 +133,10 @@ fun ProductCard(product: Inventure) {
                     contentScale = ContentScale.Crop
                 )
             } else {
-                // Placeholder if no image
                 Box(
                     modifier = Modifier
                         .size(80.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .padding(1.dp),
+                        .clip(RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Surface(
@@ -118,7 +156,7 @@ fun ProductCard(product: Inventure) {
                 }
             }
 
-            // ✅ Product Details
+            // Product Details
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -157,4 +195,258 @@ fun ProductCard(product: Inventure) {
             }
         }
     }
+}
+
+@Composable
+fun ProductDetailSheet(
+    product: Inventure,
+    viewModel: InventureViewModel,
+    onDismiss: () -> Unit
+) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showEditQuantityDialog by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Product Image
+        if (product.imageUri != null) {
+            Image(
+                painter = rememberAsyncImagePainter(product.imageUri),
+                contentDescription = product.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = Color(0xFFE0E0E0),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = product.name.take(1).uppercase(),
+                            fontSize = 80.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF4B0082)
+                        )
+                    }
+                }
+            }
+        }
+
+        // Product Name
+        Text(
+            text = product.name,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        // Description
+        Text(
+            text = product.description,
+            fontSize = 16.sp,
+            color = Color.Gray
+        )
+
+        // Info Cards
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            InfoCard(
+                title = "Price",
+                value = "₦${String.format("%,.0f", product.price)}",
+                color = Color(0xFF00897B),
+                modifier = Modifier.weight(1f)
+            )
+            InfoCard(
+                title = "Quantity",
+                value = "${product.quantity}",
+                color = if (product.quantity < 10) Color(0xFFD32F2F) else Color(0xFF43A047),
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        InfoCard(
+            title = "Total Value",
+            value = "₦${String.format("%,.0f", product.price * product.quantity)}",
+            color = Color(0xFF4B0082),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // Action Buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = { showEditQuantityDialog = true },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color(0xFF4B0082)
+                )
+            ) {
+                Icon(Icons.Default.Edit, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Edit Qty")
+            }
+
+            Button(
+                onClick = { showDeleteDialog = true },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFD32F2F)
+                )
+            ) {
+                Icon(Icons.Default.Delete, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Delete")
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+    }
+
+    // Delete Confirmation Dialog
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Product?") },
+            text = { Text("Are you sure you want to delete ${product.name}? This action cannot be undone.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.deleteProduct(product)
+                        showDeleteDialog = false
+                        onDismiss()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Edit Quantity Dialog
+    if (showEditQuantityDialog) {
+        EditQuantityDialog(
+            product = product,
+            viewModel = viewModel,
+            onDismiss = {
+                showEditQuantityDialog = false
+                onDismiss()
+            }
+        )
+    }
+}
+
+@Composable
+fun InfoCard(
+    title: String,
+    value: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.height(80.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = color)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = title,
+                fontSize = 12.sp,
+                color = Color.White.copy(alpha = 0.9f)
+            )
+            Text(
+                text = value,
+                fontSize = 18.sp,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+fun EditQuantityDialog(
+    product: Inventure,
+    viewModel: InventureViewModel,
+    onDismiss: () -> Unit
+) {
+    var newQuantity by remember { mutableStateOf(product.quantity.toString()) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit Quantity") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Current quantity: ${product.quantity}")
+                OutlinedTextField(
+                    value = newQuantity,
+                    onValueChange = {
+                        newQuantity = it
+                        errorMessage = null
+                    },
+                    label = { Text("New Quantity") },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                    ),
+                    isError = errorMessage != null,
+                    supportingText = {
+                        errorMessage?.let { Text(it, color = Color.Red) }
+                    }
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val qty = newQuantity.toIntOrNull()
+                    when {
+                        qty == null || qty < 0 -> {
+                            errorMessage = "Enter a valid quantity"
+                        }
+                        else -> {
+                            viewModel.updateProductQuantity(product, product.quantity - qty)
+                            onDismiss()
+                        }
+                    }
+                }
+            ) {
+                Text("Update")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

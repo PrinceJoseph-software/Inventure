@@ -4,6 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -15,62 +18,80 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: InventureViewModel,
-    navController: NavController
+    navController: NavController,
+    isDarkMode: Boolean,
+    onToggleDarkMode: (Boolean) -> Unit
 ) {
     val totalProducts = viewModel.totalProducts.collectAsState()
     val totalValue = viewModel.totalValue.collectAsState()
     val lowStockCount = viewModel.lowStockCount.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
-            text = "Inventory Dashboard",
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-
-        //Stats Cards Row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            StatCard(
-                title = "Products",
-                value = totalProducts.value.toString(),
-                color = Color(0xFF4B0082),
-                modifier = Modifier.weight(1f)
-            )
-            StatCard(
-                title = "Total Value",
-                value = "₦${String.format("%,.0f", totalValue.value)}",
-                color = Color(0xFF00897B),
-                modifier = Modifier.weight(1f)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Inventory Dashboard") },
+                actions = {
+                    // Dark Mode Toggle
+                    IconButton(onClick = { onToggleDarkMode(!isDarkMode) }) {
+                        Icon(
+                            imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = "Toggle Dark Mode",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Stats Cards Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatCard(
+                    title = "Products",
+                    value = totalProducts.value.toString(),
+                    color = Color(0xFF4B0082),
+                    modifier = Modifier.weight(1f)
+                )
+                StatCard(
+                    title = "Total Value",
+                    value = "₦${String.format("%,.0f", totalValue.value)}",
+                    color = Color(0xFF00897B),
+                    modifier = Modifier.weight(1f)
+                )
+            }
 
-        StatCard(
-            title = "Low Stock Items",
-            value = "${lowStockCount.value} items below 10",
-            color = if (lowStockCount.value > 0) Color(0xFFD32F2F) else Color(0xFF43A047),
-            modifier = Modifier.fillMaxWidth()
-        )
+            StatCard(
+                title = "Low Stock Items",
+                value = "${lowStockCount.value} items below 10",
+                color = if (lowStockCount.value > 0) Color(0xFFD32F2F) else Color(0xFF43A047),
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        // Menu Cards
-        MenuCard("View All Products") { navController.navigate("products") }
-        MenuCard("Add Stock") { navController.navigate("add_stock") }
-        MenuCard("Remove Stock") { navController.navigate("remove_stock") }
+            // Menu Cards
+            MenuCard("View All Products") { navController.navigate("products") }
+            MenuCard("Add Stock") { navController.navigate("add_stock") }
+            MenuCard("Remove Stock") { navController.navigate("remove_stock") }
+        }
     }
 }
 
@@ -117,7 +138,7 @@ fun MenuCard(title: String, onClick: () -> Unit) {
             .height(70.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Box(
@@ -128,7 +149,7 @@ fun MenuCard(title: String, onClick: () -> Unit) {
                 text = title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }

@@ -4,6 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import com.example.inventure.ui.theme.InventureTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -13,10 +18,28 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    private lateinit var themeManager: ThemeManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        themeManager = ThemeManager(this)
+
         setContent {
-            InventureApp(viewModel = viewModel)
+            val isDarkMode by themeManager.isDarkMode.collectAsState(initial = false)
+            val scope = rememberCoroutineScope()
+
+            InventureTheme(darkTheme = isDarkMode) {
+                InventureApp(
+                    viewModel = viewModel,
+                    isDarkMode = isDarkMode,
+                    onToggleDarkMode = { enabled ->
+                        scope.launch {
+                            themeManager.toggleDarkMode(enabled)
+                        }
+                    }
+                )
+            }
         }
     }
 }

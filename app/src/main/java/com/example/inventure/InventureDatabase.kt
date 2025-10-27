@@ -16,7 +16,7 @@ abstract class InventureDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: InventureDatabase? = null
 
-        // ✅ Migration to add imageUri column
+        //Migration to add imageUri column
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE products ADD COLUMN imageUri TEXT")

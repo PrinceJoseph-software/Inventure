@@ -42,7 +42,7 @@ fun AddStockScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    // ✅ Image Picker Launcher
+    //Image Picker Launcher
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -72,7 +72,7 @@ fun AddStockScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // ✅ Image Picker Box
+            //Image Picker Box
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

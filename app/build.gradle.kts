@@ -57,6 +57,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
 
 
+    // DataStore for theme preference
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.compose.material:material-icons-extended")
+
+
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation(libs.androidx.core.ktx)

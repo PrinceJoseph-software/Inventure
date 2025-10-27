@@ -11,5 +11,5 @@ data class Inventure(
     val description: String,
     val price: Double,
     val quantity: Int,
-    val imageUri: String? = null  // ✅ Added image field
+    val imageUri: String? = null  //image field
 )

@@ -33,7 +33,7 @@ class InventureViewModel(private val repository: ProductRepository) : ViewModel(
         description: String,
         price: Double,
         quantity: Int,
-        imageUri: String? = null  // ✅ Added parameter
+        imageUri: String? = null
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val product = Inventure(
@@ -41,7 +41,7 @@ class InventureViewModel(private val repository: ProductRepository) : ViewModel(
                 description = description,
                 price = price,
                 quantity = quantity,
-                imageUri = imageUri  // ✅ Pass to entity
+                imageUri = imageUri
             )
             repository.addProduct(product)
         }
@@ -57,7 +57,7 @@ class InventureViewModel(private val repository: ProductRepository) : ViewModel(
             val newQuantity = product.quantity - quantityToRemove
             if (newQuantity > 0) {
                 val updatedProduct = product.copy(quantity = newQuantity)
-                repository.addProduct(updatedProduct) // Room's REPLACE strategy updates it
+                repository.addProduct(updatedProduct) // Update the product quantity
             } else {
                 repository.deleteProduct(product) // Remove if quantity reaches 0
             }
